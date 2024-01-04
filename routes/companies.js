@@ -82,7 +82,6 @@ router.put("/:code", async function (req, res) {
 });
 
 /** Deletes company.
- *  
  *  Returns: {status: "deleted"}
  */
 router.delete("/:code", async function (req, res) {
