@@ -42,7 +42,7 @@ router.post("/", async function(req, res){
   if (req.body === undefined) throw new BadRequestError();
 
   const { code, name, description } = req.body;
-  //TODO: throw error if code already exists
+  
   let results;
   try{
     results = await db.query(
@@ -73,9 +73,10 @@ router.put("/:code", async function(req, res){
             SET name=$1, description = $2
             WHERE code=$3
             RETURNING code, name, description`,
-            [name, description, req.params.code]);
+    [name, description, req.params.code]
+  );
   const company = results.rows[0];
-  console.log("results of company is", company);
+  
   if (company === undefined) throw new NotFoundError();
   return res.json({ company });
 });
