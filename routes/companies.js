@@ -6,6 +6,7 @@ const db = require("../db");
 
 const router = express.Router();
 
+/** Returns list of companies, like {companies: [{code, name}, ...]} */
 router.get("/", async function(req, res){
   const results = await db.query(
     `SELECT code, name
