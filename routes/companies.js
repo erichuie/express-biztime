@@ -3,6 +3,7 @@
 const express = require("express");
 const { NotFoundError, BadRequestError, ConflictError } = require("../expressError");
 const db = require("../db");
+// const { errors } = require("undici-types");
 
 const router = express.Router();
 
@@ -52,7 +53,9 @@ router.post("/", async function (req, res) {
       [code, name, description],
     );
   } catch (err) {
-    throw new ConflictError();
+    if(err.code === '23505'){
+      throw new ConflictError();
+    }
   }
 
   const company = results.rows[0];

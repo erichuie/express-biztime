@@ -17,7 +17,7 @@ router.get("/", async function (req, res) {
   return res.json({ invoices: invoices });
 });
 
-/** Return obj of invoice: 
+/** Return obj of invoice:
  *    {invoice: {
  *      id, amt, paid, add_date, paid_date, company: {code, name, description}}
 
@@ -33,47 +33,56 @@ router.get("/:id", async function (req, res) {
 
   const invoice = invoiceResults.rows[0];
   if (!invoice) throw new NotFoundError();
-  
+
   const { comp_code } = invoice;
-  
+
   const companyResults = await db.query(
     `SELECT code, name, description
             FROM companies
             WHERE code = $1`, [comp_code]);
-  
+
   const company = companyResults.rows[0];
   if (!company) throw new NotFoundError();
-  
+
   delete(invoice.comp_code);
   invoice.company = company;
-  
+
   return res.json({ invoice });
 });
 
-/** Adds a company.
- *  Accepts JSON like: {code, name, description}
- *  Returns obj of new company: {company: {code, name, description}}
+/** Adds an invoice.
+ *  Accepts JSON like: {comp_code, amt}
+ *  Returns: {invoice: {id, comp_code, amt, paid, add_date, paid_date}}
  */
 router.post("/", async function (req, res) {
   if (req.body === undefined) throw new BadRequestError();
 
-  const { code, name, description } = req.body;
+  const { comp_code, amt } = req.body;
 
   let results;
   try {
     results = await db.query(
-      `INSERT into companies (code, name, description)
-              VALUES($1, $2, $3)
-              RETURNING code, name, description`,
-      [code, name, description],
+      `INSERT into invoices (comp_code, amt)
+              VALUES($1, $2)
+              RETURNING id, comp_code, amt, paid, add_date, paid_date`,
+      [comp_code, amt],
     );
   } catch (err) {
-    throw new ConflictError();
+    if(err.code === '22003'){
+      return res.json({
+        "error": "the amount sent is out of range"
+      });
+    }
+    else if(err.code === '23503'){
+      return res.json({
+        "error": "company doesn't exist in this app"
+      });
+    }
   }
 
-  const company = results.rows[0];
+  const invoice = results.rows[0];
 
-  return res.status(201).json({ company });
+  return res.status(201).json({ invoice });
 });
 
 /** Edit existing company.
