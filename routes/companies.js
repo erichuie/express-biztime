@@ -18,19 +18,34 @@ router.get("/", async function (req, res) {
   return res.json({ companies });
 });
 
-/** Return obj of company: {company: {code, name, description}}
+/** Return obj of company: 
+ *    {company: {code, name, description, 
+ *      invoices: [id, amt, paid, add_date, paid_date]}}
  *  If the company given cannot be found, returns a 404 status response.
  */
 router.get("/:code", async function (req, res) {
   const code = req.params.code;
 
-  const results = await db.query(
+  const companyResults = await db.query(
     `SELECT code, name, description
             FROM companies
             WHERE code = $1`, [code]);
 
-  const company = results.rows[0];
+  const company = companyResults.rows[0];
   if (!company) throw new NotFoundError();
+
+  const invoiceResults = await db.query(
+    `SELECT id, amt, paid, add_date, paid_date
+            FROM invoices
+            WHERE comp_code = $1`, [code]);
+
+  const invoices = invoiceResults.rows;
+  if (!invoices) throw new NotFoundError();
+  
+  // NOTE: unsure if want to return:
+    //invoices: [{id:1}, {id:2}...] or
+    //invoices: [{id:1, amt: 100, ...}, {invoice 2}...]
+  company.invoices = invoices
 
   return res.json({ company });
 });
