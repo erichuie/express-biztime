@@ -78,6 +78,9 @@ router.post("/", async function (req, res) {
         "error": "company doesn't exist in this app"
       });
     }
+    else{
+      throw new BadRequestError();
+    }
   }
 
   const invoice = results.rows[0];
