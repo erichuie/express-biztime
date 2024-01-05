@@ -122,20 +122,20 @@ router.put("/:id", async function (req, res) {
   return res.json({ invoice });
 });
 
-/** Deletes company.
+/** Deletes invoice.
  *  Returns: {status: "deleted"}
  */
-router.delete("/:code", async function (req, res) {
+router.delete("/:id", async function (req, res) {
 
   const results = await db.query(
-    `DELETE FROM companies
-            WHERE code=$1
-            RETURNING code`,
-    [req.params.code]
+    `DELETE FROM invoices
+            WHERE id=$1
+            RETURNING id`,
+    [req.params.id]
   );
-  const company = results.rows[0];
+  const invoice = results.rows[0];
 
-  if (company === undefined) throw new NotFoundError();
+  if (invoice === undefined) throw new NotFoundError();
   return res.json({ status: "deleted" });
 });
 
