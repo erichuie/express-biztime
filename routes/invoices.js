@@ -32,7 +32,7 @@ router.get("/:id", async function (req, res) {
             WHERE id = $1`, [id]);
 
   const invoice = invoiceResults.rows[0];
-  if (!invoice) throw new NotFoundError(); //TODO: can customize error message!
+  if (!invoice) throw new NotFoundError("No invoice with this id"); //TODO: can customize error message!
 
   const { comp_code } = invoice;
 
@@ -42,7 +42,7 @@ router.get("/:id", async function (req, res) {
             WHERE code = $1`, [comp_code]); //NOTE: need sanitize?
 
   const company = companyResults.rows[0];
-  if (!company) throw new NotFoundError(); //NOTE: don't need this?
+  if (!company) throw new NotFoundError("No company associated with this invoice"); //NOTE: don't need this?
 
   delete(invoice.comp_code);
   invoice.company = company;
@@ -90,7 +90,7 @@ router.post("/", async function (req, res) {
 
 /** Edit existing invoice.
  *  Accepts JSON like: {amt}
- *  Returns updated invoice object: 
+ *  Returns updated invoice object:
  *    {invoice: {id, comp_code, amt, paid, add_date, paid_date}}
  */
 router.put("/:id", async function (req, res) {
@@ -116,8 +116,8 @@ router.put("/:id", async function (req, res) {
 }
 
   const invoice = results.rows[0];
-  if (invoice === undefined) throw new NotFoundError();
-  
+  if (invoice === undefined) throw new NotFoundError("No invoice found with this id");
+
   return res.json({ invoice });
 });
 
@@ -134,7 +134,7 @@ router.delete("/:id", async function (req, res) {
   );
   const invoice = results.rows[0];
 
-  if (invoice === undefined) throw new NotFoundError();
+  if (invoice === undefined) throw new NotFoundError("No invoice found with this id");
   return res.json({ status: "deleted" });
 });
 

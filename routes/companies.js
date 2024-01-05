@@ -18,8 +18,8 @@ router.get("/", async function (req, res) {
   return res.json({ companies });
 });
 
-/** Return obj of company: 
- *    {company: {code, name, description, 
+/** Return obj of company:
+ *    {company: {code, name, description,
  *      invoices: [id, amt, paid, add_date, paid_date]}}
  *  If the company given cannot be found, returns a 404 status response.
  */
@@ -32,10 +32,10 @@ router.get("/:code", async function (req, res) {
             WHERE code = $1`, [code]);
 
   const company = companyResults.rows[0];
-  if (!company) throw new NotFoundError();
+  if (!company) throw new NotFoundError("There is no company associated with this code");
 
   const invoiceResults = await db.query(
-    `SELECT id, amt, paid, add_date, paid_date
+    `SELECT id
             FROM invoices
             WHERE comp_code = $1`, [code]);
 
@@ -43,8 +43,7 @@ router.get("/:code", async function (req, res) {
   // NOTE: unsure if want to return:
   //invoices: [{id:1}, {id:2}...] or
   //invoices: [{id:1, amt: 100, ...}, {invoice 2}...]
-  company.invoices = invoices
-  //TODO: fix to return invoice ids
+  company.invoices = invoices.map(invoice => invoice.id);
 
   return res.json({ company });
 });
@@ -68,7 +67,7 @@ router.post("/", async function (req, res) {
     );
   } catch (err) {
     if (err.code === '23505') {
-      throw new ConflictError();
+      throw new ConflictError("This company already exists");
     }
   }
 
@@ -94,8 +93,8 @@ router.put("/:code", async function (req, res) {
   );
   const company = results.rows[0];
 
-  if (company === undefined) throw new NotFoundError();
-  
+  if (company === undefined) throw new NotFoundError("There is no company with this code");
+
   return res.json({ company });
 });
 
@@ -111,8 +110,8 @@ router.delete("/:code", async function (req, res) {
   );
   const company = results.rows[0];
 
-  if (company === undefined) throw new NotFoundError();
-  
+  if (company === undefined) throw new NotFoundError("There is no company with this code");
+
   return res.json({ status: "deleted" });
 });
 
