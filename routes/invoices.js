@@ -32,7 +32,7 @@ router.get("/:id", async function (req, res) {
             WHERE id = $1`, [id]);
 
   const invoice = invoiceResults.rows[0];
-  if (!invoice) throw new NotFoundError();
+  if (!invoice) throw new NotFoundError(); //TODO: can customize error message!
 
   const { comp_code } = invoice;
 
@@ -70,12 +70,12 @@ router.post("/", async function (req, res) {
   } catch (err) {
     if (err.code === '22003') {
       return res.json({
-        "error": "the amount sent is out of range"
+        "error": "the amount sent is out of range" //TODO: validate amt before DBing
       });
     }
     else if (err.code === '23503') {
       return res.json({
-        "error": "company doesn't exist in this app"
+        "error": "company doesn't exist in this app" //TODO: check if company exists before DBing
       });
     }
     else {

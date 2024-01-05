@@ -3,7 +3,7 @@
 const express = require("express");
 const { NotFoundError, BadRequestError, ConflictError } = require("../expressError");
 const db = require("../db");
-// const { errors } = require("undici-types");
+
 
 const router = express.Router();
 
@@ -44,6 +44,7 @@ router.get("/:code", async function (req, res) {
   //invoices: [{id:1}, {id:2}...] or
   //invoices: [{id:1, amt: 100, ...}, {invoice 2}...]
   company.invoices = invoices
+  //TODO: fix to return invoice ids
 
   return res.json({ company });
 });
