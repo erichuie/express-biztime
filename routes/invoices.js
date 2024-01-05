@@ -14,7 +14,7 @@ router.get("/", async function (req, res) {
   );
 
   const invoices = results.rows;
-  return res.json({ invoices: invoices });
+  return res.json({ invoices });
 });
 
 /** Return obj of invoice:
@@ -39,12 +39,12 @@ router.get("/:id", async function (req, res) {
   const companyResults = await db.query(
     `SELECT code, name, description
             FROM companies
-            WHERE code = $1`, [comp_code]);
+            WHERE code = $1`, [comp_code]); //NOTE: need sanitize?
 
   const company = companyResults.rows[0];
-  if (!company) throw new NotFoundError();
+  if (!company) throw new NotFoundError(); //NOTE: don't need this?
 
-  delete (invoice.comp_code);
+  delete(invoice.comp_code);
   invoice.company = company;
 
   return res.json({ invoice });
@@ -97,7 +97,6 @@ router.put("/:id", async function (req, res) {
   if (req.body === undefined) throw new BadRequestError();
 
   let results;
-
   try  {
     results = await db.query(
       `UPDATE invoices

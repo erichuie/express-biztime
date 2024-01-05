@@ -40,11 +40,9 @@ router.get("/:code", async function (req, res) {
             WHERE comp_code = $1`, [code]);
 
   const invoices = invoiceResults.rows;
-  if (!invoices) throw new NotFoundError();
-  
   // NOTE: unsure if want to return:
-    //invoices: [{id:1}, {id:2}...] or
-    //invoices: [{id:1, amt: 100, ...}, {invoice 2}...]
+  //invoices: [{id:1}, {id:2}...] or
+  //invoices: [{id:1, amt: 100, ...}, {invoice 2}...]
   company.invoices = invoices
 
   return res.json({ company });
@@ -68,7 +66,7 @@ router.post("/", async function (req, res) {
       [code, name, description],
     );
   } catch (err) {
-    if(err.code === '23505'){
+    if (err.code === '23505') {
       throw new ConflictError();
     }
   }
@@ -96,6 +94,7 @@ router.put("/:code", async function (req, res) {
   const company = results.rows[0];
 
   if (company === undefined) throw new NotFoundError();
+  
   return res.json({ company });
 });
 
@@ -103,7 +102,6 @@ router.put("/:code", async function (req, res) {
  *  Returns: {status: "deleted"}
  */
 router.delete("/:code", async function (req, res) {
-
   const results = await db.query(
     `DELETE FROM companies
             WHERE code=$1
@@ -113,6 +111,7 @@ router.delete("/:code", async function (req, res) {
   const company = results.rows[0];
 
   if (company === undefined) throw new NotFoundError();
+  
   return res.json({ status: "deleted" });
 });
 
