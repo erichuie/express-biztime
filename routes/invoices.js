@@ -44,7 +44,7 @@ router.get("/:id", async function (req, res) {
   const company = companyResults.rows[0];
   if (!company) throw new NotFoundError();
 
-  delete(invoice.comp_code);
+  delete (invoice.comp_code);
   invoice.company = company;
 
   return res.json({ invoice });
@@ -68,17 +68,17 @@ router.post("/", async function (req, res) {
       [comp_code, amt],
     );
   } catch (err) {
-    if(err.code === '22003'){
+    if (err.code === '22003') {
       return res.json({
         "error": "the amount sent is out of range"
       });
     }
-    else if(err.code === '23503'){
+    else if (err.code === '23503') {
       return res.json({
         "error": "company doesn't exist in this app"
       });
     }
-    else{
+    else {
       throw new BadRequestError();
     }
   }
@@ -88,25 +88,38 @@ router.post("/", async function (req, res) {
   return res.status(201).json({ invoice });
 });
 
-/** Edit existing company.
- *  Accepts JSON like: {name, description}
- *  Returns update company object: {company: {code, name, description}}
+/** Edit existing invoice.
+ *  Accepts JSON like: {amt}
+ *  Returns updated invoice object: 
+ *    {invoice: {id, comp_code, amt, paid, add_date, paid_date}}
  */
-router.put("/:code", async function (req, res) {
+router.put("/:id", async function (req, res) {
   if (req.body === undefined) throw new BadRequestError();
 
-  const { name, description } = req.body;
-  const results = await db.query(
-    `UPDATE companies
-            SET name=$1, description = $2
-            WHERE code=$3
-            RETURNING code, name, description`,
-    [name, description, req.params.code]
-  );
-  const company = results.rows[0];
+  let results;
 
-  if (company === undefined) throw new NotFoundError();
-  return res.json({ company });
+  try  {
+    results = await db.query(
+      `UPDATE invoices
+              SET amt=$1
+              WHERE id=$2
+              RETURNING id, comp_code, amt, paid, add_date, paid_date`,
+      [req.body.amt, req.params.id]
+    );
+  } catch (err) {
+  if (err.code === '22003') {
+    return res.json({
+      "error": "the amount sent is out of range"
+    });
+  } else {
+    throw new BadRequestError();
+  }
+}
+
+  const invoice = results.rows[0];
+  if (invoice === undefined) throw new NotFoundError();
+  
+  return res.json({ invoice });
 });
 
 /** Deletes company.
